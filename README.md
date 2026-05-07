@@ -41,6 +41,18 @@ bun install
 
 ### 3. Add the plugin to OpenCode
 
+Install from GitHub:
+
+```sh
+opencode plugin git+ssh://git@github.com/R44VC0RP/vibe-mode.git
+```
+
+Global install from GitHub:
+
+```sh
+opencode plugin -g git+ssh://git@github.com/R44VC0RP/vibe-mode.git
+```
+
 Local project install:
 
 ```sh
