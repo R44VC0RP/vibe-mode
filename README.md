@@ -137,7 +137,7 @@ Custom stations can be configured in `tui.json`:
           {
             "id": "doom",
             "title": "Doom",
-            "subtitle": "Doom Sountrack Rebuild - Andrey Avhimovich",
+            "subtitle": "Doom Soundtrack Rebuild - Andrey Avhimovich",
             "url": "https://www.youtube.com/watch?v=CR_B0eN0BLE&list=PLtMjmjXz-rg21NJnn2ZGvr4Licxnbw0WQ&start_radio=1",
             "playlist": true
           },
