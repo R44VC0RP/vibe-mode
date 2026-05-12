@@ -14,6 +14,7 @@ type Station = {
   subtitle: string
   url: string
   startSeconds?: number
+  playlist?: boolean
 }
 
 const DEFAULT_STATIONS: Station[] = [
@@ -130,14 +131,25 @@ function readStation(value: unknown): Station | undefined {
   const subtitle = stringOption(input.subtitle, "custom station")
   const url = stringOption(input.url, "")
   const startSeconds = numberOption(input.startSeconds, -1, -1, 7200)
+  const playlist = boolOption(input.playlist, false)
   if (!id || !url) return
-  return startSeconds >= 0 ? { id, title, subtitle, url, startSeconds } : { id, title, subtitle, url }
+  return {
+    id,
+    title,
+    subtitle,
+    url,
+    ...(startSeconds >= 0 ? { startSeconds } : {}),
+    ...(playlist ? { playlist } : {}),
+  }
 }
 
 function readStations(value: unknown, fallbackUrl: string) {
   const custom = Array.isArray(value) ? value.map(readStation).filter((item): item is Station => !!item) : []
   const base = [...DEFAULT_STATIONS]
-  if (fallbackUrl !== DEFAULT_URL) base[0] = { ...base[0]!, url: fallbackUrl }
+  if (fallbackUrl !== DEFAULT_URL) {
+    const { playlist: _playlist, ...house } = base[0]!
+    base[0] = { ...house, url: fallbackUrl }
+  }
 
   const byID = new Map(base.map((item) => [item.id, item]))
   for (const item of custom) byID.set(item.id, item)
@@ -321,6 +333,7 @@ const tui: TuiPlugin = async (api, options) => {
   }
 
   const resolveStationUrl = (item: Station) => {
+    if (item.playlist) return Promise.resolve(item.url)
     if (!config.preResolve) return Promise.resolve(item.url)
 
     const cached = resolved.get(item.id)
@@ -468,6 +481,7 @@ const tui: TuiPlugin = async (api, options) => {
           `--input-ipc-server=${socket}`,
           `--volume=${input.volume}`,
           `--loop-playlist=inf`,
+          ...(input.item.playlist ? [`--ytdl-raw-options=yes-playlist=`] : []),
           `--ytdl-format=${config.ytdlFormat}`,
           `--start=${startAt}`,
           "--msg-level=all=warn",
@@ -629,7 +643,8 @@ const tui: TuiPlugin = async (api, options) => {
     setMode("starting")
     const startAt = stationStartSeconds(config, item)
     const source = await resolveStationUrl(item)
-    const ok = await sendMpv(["loadfile", source, "replace", -1, `start=${startAt}`])
+    const fileOptions = [`start=${startAt}`, ...(item.playlist ? [`ytdl-raw-options=yes-playlist=`] : [])].join(",")
+    const ok = await sendMpv(["loadfile", source, "replace", -1, fileOptions])
     if (!ok) {
       terminatePlayer()
       if (enabled()) void startPlayer()

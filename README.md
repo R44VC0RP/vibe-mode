@@ -105,9 +105,9 @@ The Vibe preview is a single right-aligned prompt metadata item. Click `Current 
 
 Built-in stations:
 
-- `house`: the default station using `https://www.youtube.com/watch?v=7MLRfIoSbdY&list=RD7MLRfIoSbdY&start_radio=1`, fixed to start at `6:52`
-- `lofi`: soft-focus loops using `https://www.youtube.com/watch?v=1J4a9cT2lkw&list=RD1J4a9cT2lkw&start_radio=1`
-- `jazz`: after-hours debugging using `https://www.youtube.com/watch?v=oL0eR16-tRs&list=RDoL0eR16-tRs&start_radio=1`
+- `house`: the default playlist station using `https://www.youtube.com/watch?v=7MLRfIoSbdY&list=RD7MLRfIoSbdY&start_radio=1`, fixed to start at `6:52`
+- `lofi`: soft-focus playlist using `https://www.youtube.com/watch?v=1J4a9cT2lkw&list=RD1J4a9cT2lkw&start_radio=1`
+- `jazz`: after-hours debugging playlist using `https://www.youtube.com/watch?v=oL0eR16-tRs&list=RDoL0eR16-tRs&start_radio=1`
 
 Custom stations can be configured in `tui.json`:
 
@@ -124,14 +124,24 @@ Custom stations can be configured in `tui.json`:
             "title": "House",
             "subtitle": "four-on-floor flow",
             "url": "https://www.youtube.com/watch?v=7MLRfIoSbdY&list=RD7MLRfIoSbdY&start_radio=1",
-            "startSeconds": 412
+            "startSeconds": 412,
+            "playlist": true
           },
           {
             "id": "ambient",
             "title": "Ambient",
             "subtitle": "low-gravity focus",
-            "url": "https://www.youtube.com/watch?v=YOUR_VIDEO_ID"
-          }
+            "url": "https://www.youtube.com/watch?v=YOUR_VIDEO_ID&list=YOUR_PLAYLIST_ID",
+            "playlist": true
+          },
+          {
+            "id": "doom",
+            "title": "Doom",
+            "subtitle": "Doom Soundtrack Rebuild - Andrey Avhimovich",
+            "url": "https://www.youtube.com/watch?v=CR_B0eN0BLE&list=PLtMjmjXz-rg21NJnn2ZGvr4Licxnbw0WQ&start_radio=1",
+            "playlist": true
+          },
+
         ]
       }
     ]
@@ -142,7 +152,7 @@ Custom stations can be configured in `tui.json`:
 ## Options
 
 - `station`: Station id to start on. Defaults to `house`.
-- `stations`: Custom station list. Items need `id`, `title`, `subtitle`, and `url`. Add optional `startSeconds` for a fixed start point.
+- `stations`: Custom station list. Items need `id`, `title`, `subtitle`, and `url`. Add optional `startSeconds` for a fixed start point, and `playlist: true` for playlist or radio URLs.
 - `url`: Backward-compatible override for the default `house` station URL.
 - `player`: Player binary. Defaults to `mpv`.
 - `volume`: Active agent volume from `0` to `100`. Defaults to `45`.
@@ -159,7 +169,7 @@ Custom stations can be configured in `tui.json`:
 
 Each station start uses a random offset between `startMinSeconds` and `startMaxSeconds`, so switching stations jumps roughly 5-10 minutes into the track. Stations with `startSeconds` use that fixed offset instead.
 
-For faster switching, the plugin pre-resolves station URLs with `yt-dlp -g` and keeps the next station preloaded at volume `0` in a standby `mpv` process. Switching to the prewarmed station promotes that player immediately, then warms the following station.
+For faster switching, the plugin pre-resolves single-track station URLs with `yt-dlp -g` and keeps the next station preloaded at volume `0` in a standby `mpv` process. Playlist stations skip pre-resolution so `mpv` can advance through the full playlist. Switching to the prewarmed station promotes that player immediately, then warms the following station.
 
 ## Notes
 
